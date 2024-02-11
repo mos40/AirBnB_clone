@@ -5,7 +5,6 @@ import re
 from models import storage
 from models.base_model import BaseModel
 
-
 class HBNBCommand(cmd.Cmd):
     """Defines the HolbertonBnB command interpreter.
 
@@ -14,6 +13,7 @@ class HBNBCommand(cmd.Cmd):
     """
 
     prompt = "(hbnb) "
+    valid_classes = {"BaseModel"}
 
     def emptyline(self):
         """Do nothing upon receiving an empty line."""
@@ -44,8 +44,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, arg):
         """Usage: show <class> <id>
-        Print the string representation of an instance
-        based on the class name and id.
+        Print the string representation of an instance based on the class name and id.
         """
         arg_list = arg.split()
         obj_dict = storage.all()
@@ -63,8 +62,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, arg):
         """Usage: destroy <class> <id>
-        Delete an instance based on the class name
-        and id (save the change into the JSON file).
+        Delete an instance based on the class name and id (save the change into the JSON file).
         """
         arg_list = arg.split()
         obj_dict = storage.all()
@@ -146,7 +144,6 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     obj.__dict__[k] = v
         storage.save()
-
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
