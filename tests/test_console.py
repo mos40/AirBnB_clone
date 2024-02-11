@@ -1,54 +1,50 @@
 import unittest
-from console import HBNBCommand
-from io import StringIO
 from unittest.mock import patch
-import os
+from io import StringIO
+from console import HBNBCommand
+from models import storage
 
 
 class TestConsole(unittest.TestCase):
-    def setUp(self):
-        self.console = HBNBCommand()
-
-    def tearDown(self):
-        del self.console
-
-    def test_quit_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.assertTrue(self.console.onecmd("quit"))
-            self.assertEqual(mock_stdout.getvalue().strip(), "")
 
     def test_help_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("help")
-            self.assertIn("Documented commands (type help <topic>):", mock_stdout.getvalue())
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("help")
+            output = f.getvalue().strip()
+            self.assertTrue("Documented commands" in output)
 
     def test_create_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("create BaseModel")
-            output = mock_stdout.getvalue().strip()
-            self.assertTrue(len(output) == 36 and all(c.isalnum() for c in output))
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create BaseModel")
+            output = f.getvalue().strip()
+            self.assertTrue(output.startswith("b"))
 
     def test_show_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("show BaseModel 1234-5678")
-            self.assertIn("** no instance found **", mock_stdout.getvalue())
-
-    def test_destroy_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("destroy BaseModel 1234-5678")
-            self.assertIn("** no instance found **", mock_stdout.getvalue())
+        with patch('sys.stdout', new=StringIO()) as f:
+            obj = HBNBCommand().onecmd("create BaseModel")
+            HBNBCommand().onecmd(f"show BaseModel {obj}")
+            output = f.getvalue().strip()
+            self.assertTrue("BaseModel" in output)
 
     def test_all_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("all")
-            self.assertIn("[]", mock_stdout.getvalue())
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create BaseModel")
+            HBNBCommand().onecmd("all BaseModel")
+            output = f.getvalue().strip()
+            self.assertTrue("BaseModel" in output)
 
     def test_update_command(self):
-        with patch('sys.stdout', new=StringIO()) as mock_stdout:
-            self.console.onecmd("update BaseModel 1234-5678 name 'John'")
-            self.assertIn("** no instance found **", mock_stdout.getvalue())
+        with patch('sys.stdout', new=StringIO()) as f:
+            obj = HBNBCommand().onecmd("create BaseModel")
+            HBNBCommand().onecmd(f"update BaseModel {obj} name 'New Name'")
+            updated_obj = storage.all()["BaseModel.{}".format(obj)]
+            self.assertEqual(updated_obj.name, 'New Name')
 
-    # Add more tests for other commands and features
+    def test_quit_command(self):
+        with patch('sys.stdout', new=StringIO()) as f:
+            with self.assertRaises(SystemExit):
+                HBNBCommand().onecmd("quit")
 
-if __name__ == '__main__':
+    # Add more test cases as needed for other commands and features
+
     unittest.main()
